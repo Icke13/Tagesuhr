@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tagesuhr">
+<meta name="theme-color" content="#111827">
+<title>Meine Tagesuhr</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; width: 100%; background: #111827; color: #fff; font-family: Arial, Helvetica, sans-serif; }
+  body { min-height: 100vh; min-height: -webkit-fill-available; display: flex; align-items: flex-start; justify-content: center; }
+  .screen { width: 100%; max-width: 1400px; padding: 5vh 4vw 3vh; }
+  .top { display: grid; grid-template-columns: 1fr auto 1.5fr; align-items: center; gap: 1.5vw; min-height: 42vh; }
+  .weekday { font-size: clamp(3.2rem, 8.5vw, 7.5rem); font-weight: 800; line-height: 1.02; }
+  .date { font-size: clamp(2rem, 5vw, 4.2rem); font-weight: 700; color: #7dd3fc; text-align: center; white-space: nowrap; }
+  .right { display: flex; align-items: baseline; justify-content: flex-end; gap: 1vw; white-space: nowrap; }
+  .clock { font-size: clamp(6rem, 18vw, 13rem); font-weight: 800; letter-spacing: -0.06em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .period-wrap { display: flex; align-items: center; gap: .5em; }
+  .period-icon { font-size: clamp(1.8rem, 4.5vw, 4rem); line-height: 1; }
+  .period { font-size: clamp(1.5rem, 4vw, 3.5rem); font-weight: 700; }
+  .note-wrap { margin-top: 5vh; }
+  .note-label { font-size: clamp(1rem, 2.5vw, 1.6rem); color: #cbd5e1; margin-bottom: 1rem; }
+  textarea { width: 100%; min-height: 22vh; resize: vertical; border: 2px solid #64748b; border-radius: 14px; background: #f8fafc; color: #111827; padding: 18px; font: clamp(1.3rem, 3vw, 2rem)/1.4 Arial, Helvetica, sans-serif; outline: none; }
+  textarea:focus { border-color: #93c5fd; }
+  .hint { margin-top: 10px; color: #94a3b8; font-size: .95rem; }
+  @media (max-width: 650px) {
+    .screen { padding: 4vh 5vw; }
+    .top { display: flex; align-items: flex-start; flex-direction: column; justify-content: center; gap: 2vh; }
+    .weekday { font-size: clamp(3.2rem, 12vw, 5.2rem); }
+    .date { text-align: left; font-size: clamp(2rem, 7vw, 3.2rem); }
+    .right { width: 100%; justify-content: space-between; gap: 2vw; }
+    .clock { font-size: clamp(5rem, 22vw, 8.5rem); }
+    .period { font-size: clamp(1.25rem, 5vw, 2.2rem); }
+    .period-icon { font-size: clamp(1.6rem, 6vw, 2.8rem); }
+    .note-wrap { margin-top: 4vh; }
+  }
+</style>
+</head>
+<body>
+<main class="screen">
+  <section class="top" aria-label="Wochentag und Uhrzeit">
+    <div class="weekday" id="weekday">Montag</div>
+    <div class="date" id="date">01.11.2026</div>
+    <div class="right">
+      <div class="clock" id="clock">00:00</div>
+      <div class="period-wrap">
+        <span class="period-icon" id="periodIcon" aria-hidden="true">🌙</span>
+        <span class="period" id="period">nachts</span>
+      </div>
+    </div>
+  </section>
+  <section class="note-wrap">
+    <div class="note-label">Notiz / Erinnerung</div>
+    <textarea id="note" placeholder="Hier können Sie einen Text eintragen …" aria-label="Freitext"></textarea>
+    <div class="hint">Der Text wird auf diesem iPad automatisch gespeichert.</div>
+  </section>
+</main>
+<script>
+(function () {
+  var weekdays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+  var clock = document.getElementById("clock");
+  var weekday = document.getElementById("weekday");
+  var date = document.getElementById("date");
+  var period = document.getElementById("period");
+  var periodIcon = document.getElementById("periodIcon");
+  var note = document.getElementById("note");
+
+  function updateClock() {
+    var now = new Date();
+    var h = now.getHours();
+    var m = now.getMinutes();
+    weekday.textContent = weekdays[now.getDay()];
+    date.textContent = now.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    clock.textContent = (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+
+    var label, color, icon;
+    if (h >= 6 && h < 9) { label = "morgens"; color = "#facc15"; icon = "🌅"; }
+    else if (h >= 9 && h < 12) { label = "vormittags"; color = "#7dd3fc"; icon = "☀️"; }
+    else if (h >= 12 && h < 14) { label = "mittags"; color = "#2563eb"; icon = "☀️"; }
+    else if (h >= 14 && h < 18) { label = "Nachmittag"; color = "#f59e0b"; icon = "🌇"; }
+    else if (h >= 18 && h < 23) { label = "Abends"; color = "#dc2626"; icon = "🌇"; }
+    else { label = "nachts"; color = "#6b7280"; icon = "🌙"; }
+    period.textContent = label;
+    period.style.color = color;
+    periodIcon.textContent = icon;
+  }
+
+  try {
+    note.value = localStorage.getItem("meineTagesuhrNotiz") || "";
+    note.addEventListener("input", function () {
+      try { localStorage.setItem("meineTagesuhrNotiz", note.value); } catch (e) {}
+    });
+  } catch (e) {}
+
+  updateClock();
+  window.setInterval(updateClock, 1000);
+}());
+</script>
+</body>
+</html>
