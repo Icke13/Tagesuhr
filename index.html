@@ -121,6 +121,13 @@ textarea:focus { border-color: #93c5fd; }
   .note-label { font-size: 38px; }
   textarea { font-size: 28px; min-height: 32vh; }
 }
+/* Auf iPads das Datum etwas nach rechts versetzen, damit es den Wochentag nicht berührt. */
+@media screen and (min-width: 651px) and (max-width: 1100px) {
+  .date {
+    position: relative;
+    left: 16px;
+  }
+}
 @media screen and (max-width: 650px) {
   .screen { padding: 3vh 5vw; }
   .top {
